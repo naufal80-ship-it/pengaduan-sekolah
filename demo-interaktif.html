@@ -1,0 +1,716 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>SiPengadu — Demo Interaktif</title>
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+<link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+:root{
+  --primary:#1a56db;--primary-dark:#1342b0;--primary-light:#e8f0fe;
+  --silver:#c0c7d0;--silver-light:#f0f2f5;--silver-dark:#8a939e;
+  --sidebar-bg:#0f1f4b;--sidebar-text:#c8d6f0;--sidebar-hover:#1a3a7a;
+  --sidebar-active:#1a56db;--card-shadow:0 2px 12px rgba(26,86,219,.1);--radius:12px;
+}
+*{box-sizing:border-box;}
+body{font-family:'Plus Jakarta Sans',sans-serif;background:var(--silver-light);color:#1a2340;min-height:100vh;overflow-x:hidden;}
+
+/* Sidebar */
+.sidebar{width:260px;min-height:100vh;background:var(--sidebar-bg);position:fixed;top:0;left:0;z-index:1000;display:flex;flex-direction:column;transition:transform .3s;}
+.sidebar-brand{padding:24px 20px 16px;border-bottom:1px solid rgba(255,255,255,.08);}
+.brand-icon{width:40px;height:40px;background:var(--primary);border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:1.2rem;color:#fff;margin-bottom:10px;}
+.brand-name{font-size:1.1rem;font-weight:800;color:#fff;letter-spacing:-.3px;}
+.brand-sub{font-size:.72rem;color:var(--sidebar-text);opacity:.7;}
+.sidebar-nav{flex:1;padding:16px 12px;}
+.nav-section-label{font-size:.65rem;font-weight:700;letter-spacing:1.2px;text-transform:uppercase;color:var(--sidebar-text);opacity:.5;padding:12px 8px 6px;}
+.sidebar-nav .nav-link{display:flex;align-items:center;gap:10px;padding:10px 12px;border-radius:8px;color:var(--sidebar-text);font-size:.88rem;font-weight:500;transition:all .2s;margin-bottom:2px;cursor:pointer;}
+.sidebar-nav .nav-link:hover{background:var(--sidebar-hover);color:#fff;}
+.sidebar-nav .nav-link.active{background:var(--sidebar-active);color:#fff;font-weight:600;}
+.sidebar-nav .nav-link i{font-size:1rem;width:20px;}
+.sidebar-footer{padding:16px 12px;border-top:1px solid rgba(255,255,255,.08);}
+.sidebar-user{display:flex;align-items:center;gap:10px;padding:10px 12px;border-radius:8px;background:rgba(255,255,255,.05);}
+.sidebar-user .avatar{width:36px;height:36px;border-radius:50%;background:var(--primary);display:flex;align-items:center;justify-content:center;font-size:.85rem;font-weight:700;color:#fff;flex-shrink:0;}
+.user-info .name{font-size:.82rem;font-weight:600;color:#fff;}
+.user-info .role-badge{font-size:.65rem;color:var(--sidebar-text);opacity:.7;}
+
+/* Main */
+.main-wrapper{margin-left:260px;min-height:100vh;display:flex;flex-direction:column;}
+.topbar{background:#fff;padding:14px 28px;border-bottom:1px solid #e2e7ed;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:900;}
+.topbar .page-title{font-size:1.05rem;font-weight:700;color:#1a2340;margin:0;}
+.content-area{padding:28px;flex:1;}
+
+/* Cards */
+.card{border:none;border-radius:var(--radius);box-shadow:var(--card-shadow);}
+.card-header{background:#fff;border-bottom:1px solid #e8ecf0;border-radius:var(--radius) var(--radius) 0 0!important;padding:16px 20px;font-weight:700;font-size:.92rem;}
+
+/* Stat cards */
+.stat-card{border-radius:var(--radius);padding:20px;display:flex;align-items:center;gap:16px;box-shadow:var(--card-shadow);border:none;background:#fff;}
+.stat-icon{width:52px;height:52px;border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:1.4rem;flex-shrink:0;}
+.stat-value{font-size:1.7rem;font-weight:800;line-height:1;}
+.stat-label{font-size:.78rem;color:var(--silver-dark);font-weight:500;margin-top:3px;}
+
+/* Table */
+.table-custom th{background:var(--silver-light);font-size:.78rem;font-weight:700;text-transform:uppercase;letter-spacing:.5px;color:var(--silver-dark);border:none;padding:12px 16px;}
+.table-custom td{padding:12px 16px;vertical-align:middle;border-color:#f0f2f5;font-size:.87rem;}
+.table-custom tbody tr:hover{background:var(--primary-light);}
+
+/* Badges */
+.badge-kategori{font-size:.7rem;font-weight:600;padding:3px 8px;border-radius:4px;}
+.kategori-kebersihan{background:#dcfce7;color:#15803d;}
+.kategori-kerusakan{background:#fee2e2;color:#dc2626;}
+.kategori-keamanan{background:#fef3c7;color:#b45309;}
+.kategori-fasilitas{background:#dbeafe;color:#1d4ed8;}
+.kategori-lainnya{background:#f3e8ff;color:#7c3aed;}
+
+.btn-primary{background:var(--primary);border-color:var(--primary);font-weight:600;}
+.btn-primary:hover{background:var(--primary-dark);border-color:var(--primary-dark);}
+.form-control:focus,.form-select:focus{border-color:var(--primary);box-shadow:0 0 0 .2rem rgba(26,86,219,.15);}
+.alert{border:none;border-radius:10px;font-size:.88rem;}
+
+/* Pages */
+.page{display:none;}
+.page.active{display:block;}
+
+/* Auth page */
+body.auth-mode{background:linear-gradient(135deg,#0f1f4b 0%,#1a3a7a 50%,#1a56db 100%);}
+body.auth-mode .sidebar,body.auth-mode .main-wrapper{display:none;}
+.auth-wrap{display:none;position:fixed;inset:0;align-items:center;justify-content:center;z-index:9999;padding:20px;}
+body.auth-mode .auth-wrap{display:flex;}
+.auth-card{background:#fff;border-radius:20px;box-shadow:0 20px 60px rgba(0,0,0,.25);overflow:hidden;width:100%;max-width:440px;}
+.auth-header{background:linear-gradient(135deg,#0f1f4b,#1a56db);padding:32px 32px 24px;text-align:center;}
+.auth-logo{width:56px;height:56px;background:rgba(255,255,255,.15);border-radius:16px;display:flex;align-items:center;justify-content:center;font-size:1.8rem;color:#fff;margin:0 auto 12px;backdrop-filter:blur(10px);}
+.auth-body{padding:28px 32px 32px;}
+.form-label{font-size:.83rem;font-weight:600;color:#374151;}
+.input-group-text{background:#f9fafb;border-color:#d1d5db;color:#6b7280;}
+.btn-auth{background:var(--primary);border:none;border-radius:8px;padding:11px;font-weight:700;font-size:.9rem;width:100%;color:#fff;}
+.btn-auth:hover{background:var(--primary-dark);color:#fff;}
+
+/* Form detail */
+.detail-meta{background:#f8fafc;border:1px solid #e2e8f0;border-radius:8px;padding:12px 16px;}
+.detail-meta .label{font-size:.68rem;color:#94a3b8;font-weight:700;text-transform:uppercase;letter-spacing:.5px;}
+.detail-meta .value{font-size:.88rem;font-weight:600;margin-top:2px;}
+
+/* Progress */
+.prog-bar{height:8px;border-radius:4px;background:#f0f2f5;overflow:hidden;}
+.prog-fill{height:100%;border-radius:4px;transition:width .5s;}
+
+/* Notification */
+.toast-custom{position:fixed;bottom:24px;right:24px;z-index:9999;min-width:280px;border:none!important;border-radius:12px!important;box-shadow:0 8px 24px rgba(0,0,0,.15)!important;}
+</style>
+</head>
+<body class="auth-mode">
+
+<!-- ══════════════ AUTH WRAP ══════════════ -->
+<div class="auth-wrap" id="authWrap">
+  <div class="auth-card" id="authCard">
+
+    <!-- LOGIN -->
+    <div id="loginPanel">
+      <div class="auth-header">
+        <div class="auth-logo"><i class="bi bi-megaphone-fill"></i></div>
+        <h1 style="font-size:1.4rem;font-weight:800;color:#fff;margin:0 0 4px;">SiPengadu</h1>
+        <p style="font-size:.8rem;color:rgba(255,255,255,.7);margin:0;">Sistem Pengaduan Sarana Sekolah</p>
+      </div>
+      <div class="auth-body">
+        <h5 style="font-size:1.05rem;font-weight:800;margin-bottom:4px;">Masuk ke Akun</h5>
+        <p class="text-muted mb-4" style="font-size:.82rem;">Pilih role untuk melanjutkan demo.</p>
+        <div class="mb-3">
+          <label class="form-label">Email</label>
+          <div class="input-group">
+            <span class="input-group-text"><i class="bi bi-envelope"></i></span>
+            <input type="email" class="form-control" id="loginEmail" placeholder="email@sekolah.sch.id">
+          </div>
+        </div>
+        <div class="mb-4">
+          <label class="form-label">Password</label>
+          <div class="input-group">
+            <span class="input-group-text"><i class="bi bi-lock"></i></span>
+            <input type="password" class="form-control" id="loginPass" placeholder="••••••••">
+          </div>
+        </div>
+        <div class="d-grid gap-2 mb-3">
+          <button class="btn btn-auth" onclick="loginAs('admin')">
+            <i class="bi bi-shield-check me-2"></i>Login sebagai Admin
+          </button>
+          <button class="btn btn-auth" style="background:#0f1f4b;" onclick="loginAs('siswa')">
+            <i class="bi bi-person-fill me-2"></i>Login sebagai Siswa
+          </button>
+        </div>
+        <div class="p-3 rounded-3" style="background:#f8fafc;border:1px solid #e2e8f0;font-size:.75rem;color:#64748b;">
+          <div class="fw-bold mb-1" style="color:#475569;">🔑 Demo Login:</div>
+          <div><b>Admin:</b> <a href="/cdn-cgi/l/email-protection" class="__cf_email__" data-cfemail="5c3d383135321c2f393733303d34722f3f34723538">[email&#160;protected]</a> / admin123</div>
+          <div><b>Siswa:</b> <a href="/cdn-cgi/l/email-protection" class="__cf_email__" data-cfemail="4f2d3a2b260f3c263c382e613c2c2761262b">[email&#160;protected]</a> / siswa123</div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<!-- ══════════════ SIDEBAR ══════════════ -->
+<div class="sidebar" id="sidebar">
+  <div class="sidebar-brand">
+    <div class="brand-icon"><i class="bi bi-megaphone-fill"></i></div>
+    <div class="brand-name">SiPengadu</div>
+    <div class="brand-sub">Sistem Pengaduan Sarana Sekolah</div>
+  </div>
+  <nav class="sidebar-nav" id="sidebarNav"></nav>
+  <div class="sidebar-footer">
+    <div class="sidebar-user mb-2" id="sidebarUserInfo"></div>
+    <button class="btn btn-sm btn-danger w-100" onclick="logout()">
+      <i class="bi bi-box-arrow-right me-1"></i> Logout
+    </button>
+  </div>
+</div>
+
+<!-- ══════════════ MAIN WRAPPER ══════════════ -->
+<div class="main-wrapper" id="mainWrapper">
+  <div class="topbar">
+    <h1 class="page-title" id="pageTitle">Dashboard</h1>
+    <div id="topbarActions"></div>
+  </div>
+  <div id="alerts" class="px-4 pt-3"></div>
+  <div class="content-area" id="contentArea"></div>
+</div>
+
+<!-- Toast -->
+<div id="toastContainer"></div>
+
+<script data-cfasync="false" src="/cdn-cgi/scripts/5c5dd728/cloudflare-static/email-decode.min.js"></script><script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+<script>
+// ═══════════════ STATE ═══════════════
+let currentRole = null;
+let currentPage = null;
+
+const data = {
+  pengaduan: [
+    {id:1,siswa:'Budi Santoso',kelas:'X IPA 1',judul:'Toilet lantai 2 bocor parah',kategori:'kerusakan',lokasi:'Gedung A, Lantai 2',deskripsi:'Toilet di lantai 2 gedung A mengalami kebocoran pada pipa utama. Air merembes ke lantai dan mengganggu kenyamanan siswa.',foto:false,status:'diproses',tanggapan:'Kami telah menghubungi teknisi untuk segera memperbaiki. Estimasi selesai 3 hari kerja.',tgl:'2 Jan 2025'},
+    {id:2,siswa:'Siti Rahayu',kelas:'XI IPS 2',judul:'Lampu kelas XI IPS 2 mati',kategori:'fasilitas',lokasi:'Kelas XI IPS 2',deskripsi:'3 dari 4 lampu di kelas kami sudah mati sejak 2 minggu lalu. Kondisi kelas sangat gelap terutama saat mendung.',foto:false,status:'menunggu',tanggapan:'',tgl:'5 Jan 2025'},
+    {id:3,siswa:'Andi Pratama',kelas:'XII IPA 3',judul:'Sampah menumpuk di kantin',kategori:'kebersihan',lokasi:'Area Kantin',deskripsi:'Tempat sampah di area kantin sudah penuh dan tidak segera dikosongkan, menyebabkan bau tidak sedap.',foto:false,status:'selesai',tanggapan:'Petugas kebersihan telah membersihkan dan jadwal pengangkutan sampah telah diperbarui.',tgl:'3 Jan 2025'},
+    {id:4,siswa:'Dewi Lestari',kelas:'X IPS 1',judul:'Pagar belakang rusak',kategori:'keamanan',lokasi:'Pagar Belakang Sekolah',deskripsi:'Beberapa batang pagar di belakang sekolah sudah bengkok dan longgar, berpotensi menjadi celah bagi orang tidak dikenal.',foto:false,status:'menunggu',tanggapan:'',tgl:'7 Jan 2025'},
+    {id:5,siswa:'Budi Santoso',kelas:'X IPA 1',judul:'AC laboratorium tidak dingin',kategori:'fasilitas',lokasi:'Lab Komputer Lantai 3',deskripsi:'AC di laboratorium komputer tidak berfungsi dengan baik sejak sebulan lalu. Kondisi ruangan sangat panas.',foto:false,status:'ditolak',tanggapan:'Setelah diperiksa, AC sedang dalam masa perbaikan besar dan dijadwalkan selesai semester depan.',tgl:'1 Jan 2025'},
+  ],
+  siswa:[
+    {id:1,name:'Budi Santoso',nis:'2024001',kelas:'X IPA 1',email:'budi@siswa.sch.id',tgl:'1 Jan 2025',total:3},
+    {id:2,name:'Siti Rahayu',nis:'2024002',kelas:'XI IPS 2',email:'siti@siswa.sch.id',tgl:'1 Jan 2025',total:1},
+    {id:3,name:'Andi Pratama',nis:'2024003',kelas:'XII IPA 3',email:'andi@siswa.sch.id',tgl:'2 Jan 2025',total:1},
+    {id:4,name:'Dewi Lestari',nis:'2024004',kelas:'X IPS 1',email:'dewi@siswa.sch.id',tgl:'3 Jan 2025',total:1},
+  ]
+};
+
+// ═══════════════ AUTH ═══════════════
+function loginAs(role){
+  currentRole = role;
+  document.body.classList.remove('auth-mode');
+  renderSidebar();
+  navigate(role === 'admin' ? 'admin-dashboard' : 'siswa-dashboard');
+  showToast('success', 'Selamat datang ' + (role==='admin'?'Admin':'Siswa') + '!');
+}
+
+function logout(){
+  currentRole = null;
+  document.body.classList.add('auth-mode');
+}
+
+// ═══════════════ SIDEBAR ═══════════════
+function renderSidebar(){
+  const nav = document.getElementById('sidebarNav');
+  const userInfo = document.getElementById('sidebarUserInfo');
+  
+  if(currentRole === 'admin'){
+    nav.innerHTML = `
+      <div class="nav-section-label">Menu Admin</div>
+      <a class="nav-link" data-page="admin-dashboard" onclick="navigate('admin-dashboard')">
+        <i class="bi bi-speedometer2"></i> Dashboard
+      </a>
+      <a class="nav-link" data-page="admin-pengaduan" onclick="navigate('admin-pengaduan')">
+        <i class="bi bi-inbox-fill"></i> Kelola Pengaduan
+      </a>
+      <a class="nav-link" data-page="admin-siswa" onclick="navigate('admin-siswa')">
+        <i class="bi bi-people-fill"></i> Data Siswa
+      </a>`;
+    userInfo.innerHTML = `
+      <div class="avatar">A</div>
+      <div class="user-info">
+        <div class="name">Administrator</div>
+        <div class="role-badge">Admin</div>
+      </div>`;
+  } else {
+    nav.innerHTML = `
+      <div class="nav-section-label">Menu Siswa</div>
+      <a class="nav-link" data-page="siswa-dashboard" onclick="navigate('siswa-dashboard')">
+        <i class="bi bi-speedometer2"></i> Dashboard
+      </a>
+      <a class="nav-link" data-page="siswa-pengaduan" onclick="navigate('siswa-pengaduan')">
+        <i class="bi bi-list-ul"></i> Pengaduan Saya
+      </a>
+      <a class="nav-link" data-page="siswa-create" onclick="navigate('siswa-create')">
+        <i class="bi bi-plus-circle-fill"></i> Buat Pengaduan
+      </a>`;
+    userInfo.innerHTML = `
+      <div class="avatar">B</div>
+      <div class="user-info">
+        <div class="name">Budi Santoso</div>
+        <div class="role-badge">Siswa — X IPA 1</div>
+      </div>`;
+  }
+}
+
+function setActiveNav(page){
+  document.querySelectorAll('.sidebar-nav .nav-link').forEach(l=>{
+    l.classList.toggle('active', l.dataset.page === page);
+  });
+}
+
+// ═══════════════ ROUTER ═══════════════
+function navigate(page, extra=null){
+  currentPage = page;
+  setActiveNav(page);
+  const content = document.getElementById('contentArea');
+  const title = document.getElementById('pageTitle');
+  const topbarActions = document.getElementById('topbarActions');
+  topbarActions.innerHTML = '';
+
+  const pages = {
+    'admin-dashboard': renderAdminDashboard,
+    'admin-pengaduan': renderAdminPengaduan,
+    'admin-siswa': renderAdminSiswa,
+    'admin-detail': () => renderAdminDetail(extra),
+    'siswa-dashboard': renderSiswaDashboard,
+    'siswa-pengaduan': renderSiswaPengaduan,
+    'siswa-create': renderSiswaCreate,
+    'siswa-detail': () => renderSiswaDetail(extra),
+  };
+
+  const titleMap = {
+    'admin-dashboard':'Dashboard Admin','admin-pengaduan':'Kelola Pengaduan','admin-siswa':'Data Siswa','admin-detail':'Tinjau Pengaduan',
+    'siswa-dashboard':'Dashboard','siswa-pengaduan':'Pengaduan Saya','siswa-create':'Buat Pengaduan Baru','siswa-detail':'Detail Pengaduan',
+  };
+
+  title.textContent = titleMap[page] || 'Dashboard';
+  content.innerHTML = '';
+  if(pages[page]) pages[page]();
+
+  if(page==='siswa-pengaduan' || page==='siswa-dashboard'){
+    topbarActions.innerHTML = `<button class="btn btn-primary btn-sm" onclick="navigate('siswa-create')"><i class="bi bi-plus-lg me-1"></i>Buat Pengaduan</button>`;
+  }
+}
+
+// ═══════════════ HELPERS ═══════════════
+function statusBadge(s){
+  const m={menunggu:'<span class="badge bg-warning text-dark">Menunggu</span>',diproses:'<span class="badge bg-primary">Diproses</span>',selesai:'<span class="badge bg-success">Selesai</span>',ditolak:'<span class="badge bg-danger">Ditolak</span>'};
+  return m[s]||'';
+}
+function katBadge(k){
+  return `<span class="badge-kategori kategori-${k}">${k.charAt(0).toUpperCase()+k.slice(1)}</span>`;
+}
+function showToast(type, msg){
+  const id='toast'+Date.now();
+  const colors={success:'#16a34a',error:'#dc2626',info:'#1a56db'};
+  const icons={success:'check-circle-fill',error:'exclamation-triangle-fill',info:'info-circle-fill'};
+  const el=document.createElement('div');
+  el.innerHTML=`<div id="${id}" class="toast-custom toast align-items-center text-white show" style="background:${colors[type]||colors.info}">
+    <div class="d-flex">
+      <div class="toast-body"><i class="bi bi-${icons[type]} me-2"></i>${msg}</div>
+      <button type="button" class="btn-close btn-close-white me-2 m-auto" onclick="this.closest('.toast-custom').remove()"></button>
+    </div>
+  </div>`;
+  document.getElementById('toastContainer').appendChild(el);
+  setTimeout(()=>{el.remove();},3500);
+}
+
+// ═══════════════ ADMIN PAGES ═══════════════
+function renderAdminDashboard(){
+  const el=document.getElementById('contentArea');
+  const total=data.pengaduan.length;
+  const menunggu=data.pengaduan.filter(p=>p.status==='menunggu').length;
+  const diproses=data.pengaduan.filter(p=>p.status==='diproses').length;
+  const selesai=data.pengaduan.filter(p=>p.status==='selesai').length;
+  const ditolak=data.pengaduan.filter(p=>p.status==='ditolak').length;
+
+  const katCount={};
+  data.pengaduan.forEach(p=>{katCount[p.kategori]=(katCount[p.kategori]||0)+1;});
+
+  const rows=data.pengaduan.slice(0,6).map(p=>`
+    <tr>
+      <td><span class="fw-600">${p.judul.length>40?p.judul.slice(0,40)+'…':p.judul}</span></td>
+      <td><div style="font-size:.82rem;font-weight:600;">${p.siswa}</div><div style="font-size:.72rem;color:#94a3b8;">${p.kelas}</div></td>
+      <td>${katBadge(p.kategori)}</td>
+      <td>${statusBadge(p.status)}</td>
+      <td><button class="btn btn-sm btn-primary" style="font-size:.75rem;padding:3px 8px;" onclick="navigate('admin-detail',${p.id})"><i class="bi bi-eye-fill"></i></button></td>
+    </tr>`).join('');
+
+  const katBars=Object.entries(katCount).map(([k,v])=>{
+    const pct=Math.round(v/total*100);
+    const colors={kebersihan:'#16a34a',kerusakan:'#dc2626',keamanan:'#b45309',fasilitas:'#1d4ed8',lainnya:'#7c3aed'};
+    return `<div class="mb-3">
+      <div class="d-flex justify-content-between mb-1"><span style="font-size:.82rem;font-weight:600;text-transform:capitalize;">${k}</span><span style="font-size:.8rem;color:#6b7280;">${v} (${pct}%)</span></div>
+      <div class="prog-bar"><div class="prog-fill" style="width:${pct}%;background:${colors[k]||'#6b7280'};"></div></div>
+    </div>`;
+  }).join('');
+
+  el.innerHTML=`
+  <div class="row g-3 mb-4">
+    ${[['Total Pengaduan',total,'inbox-fill','#eff6ff','#1a56db'],['Menunggu',menunggu,'hourglass-split','#fef9c3','#ca8a04'],['Diproses',diproses,'arrow-repeat','#eff6ff','#2563eb'],['Selesai',selesai,'check-circle-fill','#f0fdf4','#16a34a'],['Ditolak',ditolak,'x-circle-fill','#fff1f2','#dc2626'],['Total Siswa',data.siswa.length,'people-fill','#f5f3ff','#7c3aed']].map(([label,val,icon,bg,color])=>`
+      <div class="col-6 col-md-4 col-xl-2">
+        <div class="stat-card">
+          <div class="stat-icon" style="background:${bg};color:${color};"><i class="bi bi-${icon}"></i></div>
+          <div><div class="stat-value" style="color:${color};">${val}</div><div class="stat-label">${label}</div></div>
+        </div>
+      </div>`).join('')}
+  </div>
+  <div class="row g-3">
+    <div class="col-lg-8">
+      <div class="card">
+        <div class="card-header d-flex justify-content-between align-items-center">
+          <span><i class="bi bi-clock-history me-2 text-primary"></i>Pengaduan Terbaru</span>
+          <button class="btn btn-sm btn-outline-primary" onclick="navigate('admin-pengaduan')">Lihat Semua</button>
+        </div>
+        <div class="card-body p-0">
+          <div class="table-responsive">
+            <table class="table table-custom mb-0">
+              <thead><tr><th>Judul</th><th>Siswa</th><th>Kategori</th><th>Status</th><th></th></tr></thead>
+              <tbody>${rows}</tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="col-lg-4">
+      <div class="card">
+        <div class="card-header"><i class="bi bi-bar-chart-fill me-2 text-primary"></i>Per Kategori</div>
+        <div class="card-body">${katBars}</div>
+      </div>
+    </div>
+  </div>`;
+}
+
+function renderAdminPengaduan(){
+  const el=document.getElementById('contentArea');
+  const rows=data.pengaduan.map((p,i)=>`
+    <tr>
+      <td class="text-muted" style="font-size:.8rem;">${i+1}</td>
+      <td><span class="fw-600">${p.judul.length>40?p.judul.slice(0,40)+'…':p.judul}</span></td>
+      <td><div style="font-size:.82rem;font-weight:600;">${p.siswa}</div><div style="font-size:.72rem;color:#94a3b8;">${p.kelas}</div></td>
+      <td>${katBadge(p.kategori)}</td>
+      <td style="font-size:.8rem;color:#6b7280;">${p.lokasi.length>25?p.lokasi.slice(0,25)+'…':p.lokasi}</td>
+      <td style="font-size:.8rem;color:#6b7280;">${p.tgl}</td>
+      <td>${statusBadge(p.status)}</td>
+      <td>
+        <div class="d-flex gap-1">
+          <button class="btn btn-sm btn-primary" onclick="navigate('admin-detail',${p.id})"><i class="bi bi-eye-fill"></i></button>
+          <button class="btn btn-sm btn-outline-danger" onclick="deletePengaduan(${p.id})"><i class="bi bi-trash"></i></button>
+        </div>
+      </td>
+    </tr>`).join('');
+
+  el.innerHTML=`
+  <div class="card mb-3">
+    <div class="card-body py-3">
+      <div class="row g-2">
+        <div class="col-md-5"><input type="text" class="form-control form-control-sm" placeholder="Cari judul, nama siswa..."></div>
+        <div class="col-md-3"><select class="form-select form-select-sm"><option>Semua Status</option><option>Menunggu</option><option>Diproses</option><option>Selesai</option><option>Ditolak</option></select></div>
+        <div class="col-md-3"><select class="form-select form-select-sm"><option>Semua Kategori</option><option>Kebersihan</option><option>Kerusakan</option><option>Keamanan</option><option>Fasilitas</option><option>Lainnya</option></select></div>
+        <div class="col-md-1"><button class="btn btn-primary btn-sm w-100"><i class="bi bi-search"></i></button></div>
+      </div>
+    </div>
+  </div>
+  <div class="card">
+    <div class="card-header d-flex justify-content-between"><span><i class="bi bi-inbox-fill me-2 text-primary"></i>Daftar Pengaduan</span><small class="text-muted">${data.pengaduan.length} pengaduan</small></div>
+    <div class="card-body p-0">
+      <div class="table-responsive">
+        <table class="table table-custom mb-0">
+          <thead><tr><th>#</th><th>Judul</th><th>Siswa</th><th>Kategori</th><th>Lokasi</th><th>Tanggal</th><th>Status</th><th>Aksi</th></tr></thead>
+          <tbody>${rows}</tbody>
+        </table>
+      </div>
+    </div>
+  </div>`;
+}
+
+function renderAdminDetail(id){
+  const p=data.pengaduan.find(x=>x.id===id);
+  if(!p) return;
+  const el=document.getElementById('contentArea');
+  el.innerHTML=`
+  <div class="mb-3"><button class="btn btn-sm btn-outline-secondary" onclick="navigate('admin-pengaduan')"><i class="bi bi-arrow-left me-1"></i>Kembali</button></div>
+  <div class="row">
+    <div class="col-lg-7">
+      <div class="card mb-3">
+        <div class="card-header d-flex justify-content-between align-items-center">
+          <span><i class="bi bi-file-text me-2 text-primary"></i>Detail Pengaduan</span>
+          <div class="d-flex gap-2">${katBadge(p.kategori)}${statusBadge(p.status)}</div>
+        </div>
+        <div class="card-body">
+          <h5 class="fw-800 mb-3">${p.judul}</h5>
+          <div class="row g-3 mb-3">
+            <div class="col-md-4"><div class="detail-meta"><div class="label">Pelapor</div><div class="value">${p.siswa}</div><div style="font-size:.78rem;color:#6b7280;">${p.kelas}</div></div></div>
+            <div class="col-md-4"><div class="detail-meta"><div class="label">Lokasi</div><div class="value"><i class="bi bi-geo-alt-fill text-primary me-1"></i>${p.lokasi}</div></div></div>
+            <div class="col-md-4"><div class="detail-meta"><div class="label">Tanggal</div><div class="value">${p.tgl}</div></div></div>
+          </div>
+          <div class="mb-3">
+            <div style="font-size:.72rem;color:#94a3b8;font-weight:700;text-transform:uppercase;margin-bottom:8px;">Deskripsi</div>
+            <div class="p-3 rounded-2" style="background:#f8fafc;border:1px solid #e2e8f0;font-size:.9rem;line-height:1.7;">${p.deskripsi}</div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="col-lg-5">
+      <div class="card" style="position:sticky;top:80px;">
+        <div class="card-header"><i class="bi bi-pencil-square me-2 text-primary"></i>Update Status</div>
+        <div class="card-body">
+          <div class="mb-3">
+            <label class="form-label fw-600">Status Pengaduan</label>
+            <select class="form-select" id="statusSelect${id}">
+              ${['menunggu','diproses','selesai','ditolak'].map(s=>`<option value="${s}" ${p.status===s?'selected':''}>${s.charAt(0).toUpperCase()+s.slice(1)}</option>`).join('')}
+            </select>
+          </div>
+          <div class="mb-4">
+            <label class="form-label fw-600">Tanggapan Admin</label>
+            <textarea class="form-control" rows="5" id="tanggapanInput${id}" placeholder="Tulis tanggapan untuk siswa...">${p.tanggapan}</textarea>
+          </div>
+          <button class="btn btn-primary w-100" onclick="updateStatus(${id})"><i class="bi bi-save-fill me-2"></i>Simpan Perubahan</button>
+          ${p.tanggapan?`<hr><div class="p-3 rounded-2" style="background:#eff6ff;border:1px solid #bfdbfe;"><div style="font-size:.72rem;font-weight:700;color:#1d4ed8;margin-bottom:6px;text-transform:uppercase;">Tanggapan Terakhir</div><p class="mb-0" style="font-size:.85rem;color:#1e3a8a;">${p.tanggapan}</p></div>`:''}
+        </div>
+      </div>
+    </div>
+  </div>`;
+}
+
+function renderAdminSiswa(){
+  const el=document.getElementById('contentArea');
+  const rows=data.siswa.map((s,i)=>`
+    <tr>
+      <td class="text-muted" style="font-size:.8rem;">${i+1}</td>
+      <td><div class="d-flex align-items-center gap-2">
+        <div style="width:32px;height:32px;background:#eff6ff;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:.82rem;font-weight:700;color:#1a56db;">${s.name.charAt(0)}</div>
+        <span class="fw-600" style="font-size:.87rem;">${s.name}</span>
+      </div></td>
+      <td style="font-size:.85rem;font-family:monospace;">${s.nis}</td>
+      <td><span class="badge" style="background:#eff6ff;color:#1d4ed8;font-size:.75rem;">${s.kelas}</span></td>
+      <td style="font-size:.82rem;color:#6b7280;">${s.email}</td>
+      <td style="font-size:.8rem;color:#6b7280;">${s.tgl}</td>
+      <td><span class="fw-700" style="color:#1a56db;">${s.total}</span> <span class="text-muted" style="font-size:.78rem;">pengaduan</span></td>
+    </tr>`).join('');
+
+  el.innerHTML=`
+  <div class="card">
+    <div class="card-header d-flex justify-content-between"><span><i class="bi bi-people-fill me-2 text-primary"></i>Daftar Siswa Terdaftar</span><small class="text-muted">${data.siswa.length} siswa</small></div>
+    <div class="card-body p-0">
+      <div class="table-responsive">
+        <table class="table table-custom mb-0">
+          <thead><tr><th>#</th><th>Nama</th><th>NIS</th><th>Kelas</th><th>Email</th><th>Bergabung</th><th>Pengaduan</th></tr></thead>
+          <tbody>${rows}</tbody>
+        </table>
+      </div>
+    </div>
+  </div>`;
+}
+
+// ═══════════════ SISWA PAGES ═══════════════
+function renderSiswaDashboard(){
+  const el=document.getElementById('contentArea');
+  const myData=data.pengaduan.filter(p=>p.siswa==='Budi Santoso');
+  const total=myData.length;
+  const menunggu=myData.filter(p=>p.status==='menunggu').length;
+  const diproses=myData.filter(p=>p.status==='diproses').length;
+  const selesai=myData.filter(p=>p.status==='selesai').length;
+
+  const rows=myData.slice(0,5).map(p=>`
+    <tr>
+      <td class="fw-600">${p.judul.length>40?p.judul.slice(0,40)+'…':p.judul}</td>
+      <td>${katBadge(p.kategori)}</td>
+      <td style="font-size:.8rem;color:#6b7280;">${p.tgl}</td>
+      <td>${statusBadge(p.status)}</td>
+      <td><button class="btn btn-sm btn-outline-primary" style="font-size:.75rem;padding:3px 8px;" onclick="navigate('siswa-detail',${p.id})"><i class="bi bi-eye"></i></button></td>
+    </tr>`).join('');
+
+  el.innerHTML=`
+  <div class="p-4 mb-4 rounded-3" style="background:linear-gradient(135deg,#0f1f4b,#1a56db);color:#fff;">
+    <div class="d-flex align-items-center gap-3">
+      <div style="width:52px;height:52px;background:rgba(255,255,255,.15);border-radius:14px;display:flex;align-items:center;justify-content:center;font-size:1.5rem;">👋</div>
+      <div>
+        <h5 class="mb-0 fw-800" style="font-size:1.1rem;">Selamat datang, Budi Santoso!</h5>
+        <div style="font-size:.82rem;opacity:.8;">X IPA 1 &bull; NIS 2024001</div>
+      </div>
+    </div>
+  </div>
+  <div class="row g-3 mb-4">
+    ${[['Total',total,'inbox-fill','#eff6ff','#1a56db'],['Menunggu',menunggu,'hourglass-split','#fef9c3','#ca8a04'],['Diproses',diproses,'arrow-repeat','#eff6ff','#2563eb'],['Selesai',selesai,'check-circle-fill','#f0fdf4','#16a34a']].map(([label,val,icon,bg,color])=>`
+      <div class="col-6 col-md-3">
+        <div class="stat-card">
+          <div class="stat-icon" style="background:${bg};color:${color};"><i class="bi bi-${icon}"></i></div>
+          <div><div class="stat-value" style="color:${color};">${val}</div><div class="stat-label">${label}</div></div>
+        </div>
+      </div>`).join('')}
+  </div>
+  <div class="card">
+    <div class="card-header d-flex justify-content-between align-items-center">
+      <span><i class="bi bi-clock-history me-2 text-primary"></i>Pengaduan Terbaru</span>
+      <button class="btn btn-sm btn-outline-primary" onclick="navigate('siswa-pengaduan')">Lihat Semua</button>
+    </div>
+    <div class="card-body p-0">
+      <div class="table-responsive">
+        <table class="table table-custom mb-0">
+          <thead><tr><th>Judul</th><th>Kategori</th><th>Tanggal</th><th>Status</th><th></th></tr></thead>
+          <tbody>${rows}</tbody>
+        </table>
+      </div>
+    </div>
+  </div>`;
+}
+
+function renderSiswaPengaduan(){
+  const el=document.getElementById('contentArea');
+  const myData=data.pengaduan.filter(p=>p.siswa==='Budi Santoso');
+  const rows=myData.map((p,i)=>`
+    <tr>
+      <td class="text-muted" style="font-size:.8rem;">${i+1}</td>
+      <td class="fw-600" style="font-size:.87rem;">${p.judul.length>45?p.judul.slice(0,45)+'…':p.judul}</td>
+      <td>${katBadge(p.kategori)}</td>
+      <td style="font-size:.82rem;color:#6b7280;"><i class="bi bi-geo-alt me-1"></i>${p.lokasi.length>25?p.lokasi.slice(0,25)+'…':p.lokasi}</td>
+      <td style="font-size:.8rem;color:#6b7280;">${p.tgl}</td>
+      <td>${statusBadge(p.status)}</td>
+      <td>
+        <div class="d-flex gap-1">
+          <button class="btn btn-sm btn-outline-primary" onclick="navigate('siswa-detail',${p.id})"><i class="bi bi-eye"></i></button>
+          ${p.status==='menunggu'?`<button class="btn btn-sm btn-outline-danger" onclick="deletePengaduan(${p.id});navigate('siswa-pengaduan')"><i class="bi bi-trash"></i></button>`:''}
+        </div>
+      </td>
+    </tr>`).join('');
+
+  el.innerHTML=`
+  <div class="card">
+    <div class="card-header d-flex justify-content-between">
+      <span><i class="bi bi-list-ul me-2 text-primary"></i>Daftar Pengaduan</span>
+      <small class="text-muted">${myData.length} pengaduan</small>
+    </div>
+    <div class="card-body p-0">
+      <div class="table-responsive">
+        <table class="table table-custom mb-0">
+          <thead><tr><th>#</th><th>Judul</th><th>Kategori</th><th>Lokasi</th><th>Tanggal</th><th>Status</th><th>Aksi</th></tr></thead>
+          <tbody>${rows}</tbody>
+        </table>
+      </div>
+    </div>
+  </div>`;
+}
+
+function renderSiswaCreate(){
+  const el=document.getElementById('contentArea');
+  el.innerHTML=`
+  <div class="row justify-content-center">
+    <div class="col-lg-8">
+      <div class="card">
+        <div class="card-header"><i class="bi bi-megaphone-fill me-2 text-primary"></i>Form Pengaduan Sarana Sekolah</div>
+        <div class="card-body p-4">
+          <div class="mb-3">
+            <label class="form-label fw-600">Judul Pengaduan <span class="text-danger">*</span></label>
+            <input type="text" class="form-control" id="newJudul" placeholder="Contoh: Toilet lantai 2 rusak">
+          </div>
+          <div class="row g-3 mb-3">
+            <div class="col-md-6">
+              <label class="form-label fw-600">Kategori <span class="text-danger">*</span></label>
+              <select class="form-select" id="newKategori">
+                <option value="">-- Pilih Kategori --</option>
+                <option value="kebersihan">🧹 Kebersihan</option>
+                <option value="kerusakan">🔧 Kerusakan</option>
+                <option value="keamanan">🔒 Keamanan</option>
+                <option value="fasilitas">🏫 Fasilitas</option>
+                <option value="lainnya">📋 Lainnya</option>
+              </select>
+            </div>
+            <div class="col-md-6">
+              <label class="form-label fw-600">Lokasi <span class="text-danger">*</span></label>
+              <input type="text" class="form-control" id="newLokasi" placeholder="Contoh: Gedung A, Lantai 2">
+            </div>
+          </div>
+          <div class="mb-3">
+            <label class="form-label fw-600">Deskripsi Detail <span class="text-danger">*</span></label>
+            <textarea class="form-control" rows="5" id="newDeskripsi" placeholder="Jelaskan masalah secara detail. Minimal 20 karakter."></textarea>
+            <div class="form-text">Minimal 20 karakter.</div>
+          </div>
+          <div class="mb-4">
+            <label class="form-label fw-600">Foto Bukti <span class="text-muted fw-normal">(Opsional)</span></label>
+            <input type="file" class="form-control" accept="image/*">
+            <div class="form-text">Format: JPG, PNG. Maks. 2MB.</div>
+          </div>
+          <div class="d-flex gap-2">
+            <button class="btn btn-primary px-4" onclick="submitPengaduan()"><i class="bi bi-send-fill me-2"></i>Kirim Pengaduan</button>
+            <button class="btn btn-outline-secondary px-4" onclick="navigate('siswa-pengaduan')">Batal</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>`;
+}
+
+function renderSiswaDetail(id){
+  const p=data.pengaduan.find(x=>x.id===id);
+  if(!p) return;
+  const el=document.getElementById('contentArea');
+  el.innerHTML=`
+  <div class="row justify-content-center">
+    <div class="col-lg-8">
+      <div class="mb-3"><button class="btn btn-sm btn-outline-secondary" onclick="navigate('siswa-pengaduan')"><i class="bi bi-arrow-left me-1"></i>Kembali</button></div>
+      <div class="card mb-3">
+        <div class="card-header d-flex justify-content-between align-items-center">
+          <span><i class="bi bi-file-text me-2 text-primary"></i>Informasi Pengaduan</span>
+          <div class="d-flex gap-2">${katBadge(p.kategori)}${statusBadge(p.status)}</div>
+        </div>
+        <div class="card-body">
+          <h5 class="fw-800 mb-3">${p.judul}</h5>
+          <div class="row g-3 mb-3">
+            <div class="col-md-6"><div class="detail-meta"><div class="label">Lokasi</div><div class="value"><i class="bi bi-geo-alt-fill text-primary me-1"></i>${p.lokasi}</div></div></div>
+            <div class="col-md-6"><div class="detail-meta"><div class="label">Tanggal Pengaduan</div><div class="value"><i class="bi bi-calendar3 text-primary me-1"></i>${p.tgl}</div></div></div>
+          </div>
+          <div>
+            <div style="font-size:.72rem;color:#94a3b8;font-weight:700;text-transform:uppercase;margin-bottom:8px;">Deskripsi</div>
+            <div class="p-3 rounded-2" style="background:#f8fafc;border:1px solid #e2e8f0;font-size:.9rem;line-height:1.7;">${p.deskripsi}</div>
+          </div>
+        </div>
+      </div>
+      ${p.tanggapan?`
+      <div class="card border-0" style="background:#eff6ff;border:1px solid #bfdbfe!important;">
+        <div class="card-body">
+          <div class="d-flex align-items-center gap-2 mb-2">
+            <div style="width:32px;height:32px;background:#1a56db;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:.8rem;color:#fff;"><i class="bi bi-person-badge"></i></div>
+            <div><div style="font-size:.8rem;font-weight:700;color:#1d4ed8;">Tanggapan Admin</div></div>
+          </div>
+          <p class="mb-0" style="font-size:.88rem;color:#1e3a8a;line-height:1.7;">${p.tanggapan}</p>
+        </div>
+      </div>`:`<div class="text-center py-3 text-muted" style="font-size:.85rem;"><i class="bi bi-clock me-1"></i>Menunggu tanggapan dari admin.</div>`}
+    </div>
+  </div>`;
+}
+
+// ═══════════════ ACTIONS ═══════════════
+function updateStatus(id){
+  const p=data.pengaduan.find(x=>x.id===id);
+  if(!p) return;
+  p.status=document.getElementById('statusSelect'+id).value;
+  p.tanggapan=document.getElementById('tanggapanInput'+id).value;
+  showToast('success','Status pengaduan berhasil diperbarui!');
+  navigate('admin-detail',id);
+}
+
+function deletePengaduan(id){
+  if(!confirm('Hapus pengaduan ini?')) return;
+  const idx=data.pengaduan.findIndex(x=>x.id===id);
+  if(idx>-1) data.pengaduan.splice(idx,1);
+  showToast('success','Pengaduan berhasil dihapus.');
+}
+
+function submitPengaduan(){
+  const judul=document.getElementById('newJudul').value.trim();
+  const kategori=document.getElementById('newKategori').value;
+  const lokasi=document.getElementById('newLokasi').value.trim();
+  const deskripsi=document.getElementById('newDeskripsi').value.trim();
+  if(!judul||!kategori||!lokasi||deskripsi.length<20){
+    showToast('error','Harap isi semua kolom wajib dengan benar (deskripsi min. 20 karakter).');
+    return;
+  }
+  const newId=data.pengaduan.length+1;
+  data.pengaduan.
