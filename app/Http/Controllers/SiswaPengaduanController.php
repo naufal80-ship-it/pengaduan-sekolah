@@ -149,6 +149,8 @@ class SiswaPengaduanController extends Controller
             Storage::disk('public')->delete($pengaduan->foto);
         }
 
+        
+
         $pengaduan->delete();
 
         return redirect()->route('siswa.pengaduan.index')
