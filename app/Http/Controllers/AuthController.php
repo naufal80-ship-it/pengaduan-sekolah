@@ -26,6 +26,9 @@ class AuthController extends Controller
             'password.required' => 'Password wajib diisi.',
         ]);
 
+
+        
+
         $credentials = $request->only('email', 'password');
 
         if (Auth::attempt($credentials, $request->boolean('remember'))) {
