@@ -50,6 +50,8 @@ class Pengaduan extends Model
         };
     }
 
+    
+
     public function getKategoriBadgeAttribute(): string
     {
         return match($this->kategori) {
