@@ -71,6 +71,8 @@ class AdminController extends Controller
             'status.required' => 'Status wajib dipilih.',
         ]);
 
+
+        
         $pengaduan->update([
             'status'    => $request->status,
             'tanggapan' => $request->tanggapan,
